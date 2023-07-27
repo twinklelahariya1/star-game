@@ -1,7 +1,8 @@
+import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const stars = 9;
+  const [stars, setStars] = useState(utils.random(1, 9));
 
   return (
     <div className="game">
