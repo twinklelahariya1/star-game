@@ -11,15 +11,11 @@ function App() {
       </div>
       <div className="body">
         <div className="left">
-          {utils.range(1, stars).map((starId) => (
-            <div key={starId} className="star" />
-          ))}
+          <StarsDisplay stars={stars} />
         </div>
         <div className="right">
           {utils.range(1, 9).map((number) => (
-            <button key={number} className="number">
-              {number}
-            </button>
+            <PlayNumber key={number} number={number} />
           ))}
         </div>
       </div>
@@ -29,6 +25,27 @@ function App() {
 }
 
 export default App;
+
+const StarsDisplay = (props: { stars: number }) => {
+  return (
+    <>
+      {utils.range(1, props.stars).map((starId) => (
+        <div key={starId} className="star" />
+      ))}
+    </>
+  );
+};
+
+const PlayNumber = (props: { number: number }) => {
+  return (
+    <button
+      className="number"
+      onClick={() => console.log("Clicked on the number : " + props.number)}
+    >
+      {props.number}
+    </button>
+  );
+};
 
 // Color Theme
 const colors = {
