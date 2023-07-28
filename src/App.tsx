@@ -3,6 +3,42 @@ import "./App.css";
 
 function App() {
   const [stars, setStars] = useState(utils.random(1, 9));
+  const [availableNumbers, setAvailableNumbers] = useState(utils.range(1,9));
+  const [candidateNumbers, setCandidateNumbers] = useState<number[]>([]);
+
+  const candidatesAreWrong = utils.sum(candidateNumbers) > stars;
+
+  const numberStatus = (number: number) => {
+    if (!availableNumbers.includes(number)) {
+      return "used";
+    } else if (candidateNumbers.includes(number)) {
+      return candidatesAreWrong ? "wrong" : "candidate";
+    }
+    return "available";
+  };
+
+  const onNumberClick = (number: number, numberStatus: string) => {
+    if (numberStatus === 'used') {
+      return;
+    }
+
+		const newCandidateNums =
+    numberStatus === 'available'
+        ? candidateNumbers.concat(number)
+        : candidateNumbers.filter(cn => cn !== number);
+
+    if (utils.sum(newCandidateNums) !== stars) {
+      setCandidateNumbers(newCandidateNums);
+    } else {
+      const newAvailableNums = availableNumbers.filter(
+        n => !newCandidateNums.includes(n)
+      );
+      setStars(utils.randomSumIn(newAvailableNums, 9));
+      setAvailableNumbers(newAvailableNums);
+      setCandidateNumbers([]);
+    }
+
+  };
 
   return (
     <div className="game">
@@ -13,9 +49,15 @@ function App() {
         <div className="left">
           <StarsDisplay stars={stars} />
         </div>
+
         <div className="right">
           {utils.range(1, 9).map((number) => (
-            <PlayNumber key={number} number={number} />
+            <PlayNumber
+              key={number}
+              numberStatus={numberStatus(number)}
+              number={number}
+              onClick={onNumberClick}
+            />
           ))}
         </div>
       </div>
@@ -36,11 +78,16 @@ const StarsDisplay = (props: { stars: number }) => {
   );
 };
 
-const PlayNumber = (props: { number: number }) => {
+const PlayNumber = (props: {
+  numberStatus: string;
+  number: number;
+  onClick: (numbner: number, numberType: string) => void;
+}) => {
   return (
     <button
       className="number"
-      onClick={() => console.log("Clicked on the number : " + props.number)}
+      style={{ backgroundColor: (colors as any)[props.numberStatus] }}
+      onClick={() => props.onClick(props.number, props.numberStatus)}
     >
       {props.number}
     </button>
