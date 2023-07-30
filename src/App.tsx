@@ -1,19 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
   const [stars, setStars] = useState(utils.random(1, 9));
   const [availableNumbers, setAvailableNumbers] = useState(utils.range(1, 9));
   const [candidateNumbers, setCandidateNumbers] = useState<number[]>([]);
+  const [secondsLeft, setSecondsLeft] = useState(10);
+  useEffect(() => {
+    if (secondsLeft > 0 && availableNumbers.length > 0) {
+      const timerId = setTimeout(() => {
+        setSecondsLeft(secondsLeft - 1);
+      }, 1000);
+      return () => clearTimeout(timerId);
+    }
+  });
 
   const candidatesAreWrong = utils.sum(candidateNumbers) > stars;
 
-  const gameIsDone = availableNumbers.length === 0;
+  const gameStatus =
+    availableNumbers.length === 0
+      ? "won"
+      : secondsLeft === 0
+      ? "lost"
+      : "active";
 
   const resetGameValues = () => {
     setStars(utils.random(1, 9));
     setAvailableNumbers(utils.range(1, 9));
     setCandidateNumbers([]);
+    setSecondsLeft(10);
   };
 
   const numberStatus = (number: number) => {
@@ -26,7 +41,7 @@ function App() {
   };
 
   const onNumberClick = (number: number, numberStatus: string) => {
-    if (numberStatus === "used") {
+    if (gameStatus!=='active' || numberStatus === "used") {
       return;
     }
 
@@ -54,8 +69,8 @@ function App() {
       </div>
       <div className="body">
         <div className="left">
-          {gameIsDone ? (
-            <ResetGame onClick={resetGameValues} />
+          {gameStatus !== "active" ? (
+            <ResetGame onClick={resetGameValues} gameStatus={gameStatus} />
           ) : (
             <StarsDisplay stars={stars} />
           )}
@@ -71,7 +86,7 @@ function App() {
           ))}
         </div>
       </div>
-      <div className="timer">Time Remaining: 10</div>
+      <div className="timer">Time Remaining: {secondsLeft}</div>
     </div>
   );
 }
@@ -88,9 +103,15 @@ const StarsDisplay = (props: { stars: number }) => {
   );
 };
 
-const ResetGame = (props: { onClick: () => void }) => {
+const ResetGame = (props: { onClick: () => void; gameStatus: string }) => {
   return (
     <div className="replay-game">
+      <div
+        className="message"
+        style={{ color: props.gameStatus === "lost" ? "red" : "green" }}
+      >
+        {props.gameStatus === "lost" ? "Game Over" : "Won"}
+      </div>
       <button onClick={props.onClick}> Play Again </button>
     </div>
   );
