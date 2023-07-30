@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-function App() {
+function App(props: { startNewGame: () => void }) {
   const [stars, setStars] = useState(utils.random(1, 9));
   const [availableNumbers, setAvailableNumbers] = useState(utils.range(1, 9));
   const [candidateNumbers, setCandidateNumbers] = useState<number[]>([]);
@@ -24,13 +24,6 @@ function App() {
       ? "lost"
       : "active";
 
-  const resetGameValues = () => {
-    setStars(utils.random(1, 9));
-    setAvailableNumbers(utils.range(1, 9));
-    setCandidateNumbers([]);
-    setSecondsLeft(10);
-  };
-
   const numberStatus = (number: number) => {
     if (!availableNumbers.includes(number)) {
       return "used";
@@ -41,7 +34,7 @@ function App() {
   };
 
   const onNumberClick = (number: number, numberStatus: string) => {
-    if (gameStatus!=='active' || numberStatus === "used") {
+    if (gameStatus !== "active" || numberStatus === "used") {
       return;
     }
 
@@ -70,7 +63,7 @@ function App() {
       <div className="body">
         <div className="left">
           {gameStatus !== "active" ? (
-            <ResetGame onClick={resetGameValues} gameStatus={gameStatus} />
+            <ResetGame onClick={props.startNewGame} gameStatus={gameStatus} />
           ) : (
             <StarsDisplay stars={stars} />
           )}
@@ -91,7 +84,10 @@ function App() {
   );
 }
 
-export default App;
+export default function StarMatch() {
+  const [gameId, setGameID] = useState(1);
+  return <App key={gameId} startNewGame={() => setGameID(gameId + 1)} />;
+}
 
 const StarsDisplay = (props: { stars: number }) => {
   return (
