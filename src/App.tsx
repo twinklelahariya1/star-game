@@ -3,10 +3,18 @@ import "./App.css";
 
 function App() {
   const [stars, setStars] = useState(utils.random(1, 9));
-  const [availableNumbers, setAvailableNumbers] = useState(utils.range(1,9));
+  const [availableNumbers, setAvailableNumbers] = useState(utils.range(1, 9));
   const [candidateNumbers, setCandidateNumbers] = useState<number[]>([]);
 
   const candidatesAreWrong = utils.sum(candidateNumbers) > stars;
+
+  const gameIsDone = availableNumbers.length === 0;
+
+  const resetGameValues = () => {
+    setStars(utils.random(1, 9));
+    setAvailableNumbers(utils.range(1, 9));
+    setCandidateNumbers([]);
+  };
 
   const numberStatus = (number: number) => {
     if (!availableNumbers.includes(number)) {
@@ -18,26 +26,25 @@ function App() {
   };
 
   const onNumberClick = (number: number, numberStatus: string) => {
-    if (numberStatus === 'used') {
+    if (numberStatus === "used") {
       return;
     }
 
-		const newCandidateNums =
-    numberStatus === 'available'
+    const newCandidateNums =
+      numberStatus === "available"
         ? candidateNumbers.concat(number)
-        : candidateNumbers.filter(cn => cn !== number);
+        : candidateNumbers.filter((cn) => cn !== number);
 
     if (utils.sum(newCandidateNums) !== stars) {
       setCandidateNumbers(newCandidateNums);
     } else {
       const newAvailableNums = availableNumbers.filter(
-        n => !newCandidateNums.includes(n)
+        (n) => !newCandidateNums.includes(n)
       );
       setStars(utils.randomSumIn(newAvailableNums, 9));
       setAvailableNumbers(newAvailableNums);
       setCandidateNumbers([]);
     }
-
   };
 
   return (
@@ -47,9 +54,12 @@ function App() {
       </div>
       <div className="body">
         <div className="left">
-          <StarsDisplay stars={stars} />
+          {gameIsDone ? (
+            <ResetGame onClick={resetGameValues} />
+          ) : (
+            <StarsDisplay stars={stars} />
+          )}
         </div>
-
         <div className="right">
           {utils.range(1, 9).map((number) => (
             <PlayNumber
@@ -75,6 +85,14 @@ const StarsDisplay = (props: { stars: number }) => {
         <div key={starId} className="star" />
       ))}
     </>
+  );
+};
+
+const ResetGame = (props: { onClick: () => void }) => {
+  return (
+    <div className="replay-game">
+      <button onClick={props.onClick}> Play Again </button>
+    </div>
   );
 };
 
